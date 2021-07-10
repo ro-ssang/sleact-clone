@@ -1,9 +1,16 @@
 import path from 'path';
-import webpack from 'webpack';
+import webpack, { Configuration as WebpackConfiguration } from 'webpack';
+import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+
+interface Configuration extends WebpackConfiguration {
+  devServer?: WebpackDevServerConfiguration;
+}
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
-const config: webpack.Configuration = {
+const config: Configuration = {
   name: 'sleact-clone-setting',
   mode: isDevelopment ? 'development' : 'production',
   devtool: isDevelopment ? 'hidden-source-map' : 'inline-source-map',
@@ -42,6 +49,11 @@ const config: webpack.Configuration = {
               '@babel/preset-react',
               '@babel/preset-typescript',
             ],
+            env: {
+              development: {
+                plugins: [require('react-refresh/babel')],
+              },
+            },
           },
         },
       },
@@ -52,13 +64,35 @@ const config: webpack.Configuration = {
     ],
   },
 
-  plugins: [new webpack.EnvironmentPlugin({ NODE_ENV: isDevelopment ? 'development' : 'production' })],
+  plugins: [
+    new ForkTsCheckerWebpackPlugin({
+      async: false,
+      // eslint: {
+      //   files: "./src/**/*",
+      // },
+    }),
+    new webpack.EnvironmentPlugin({ NODE_ENV: isDevelopment ? 'development' : 'production' }),
+  ],
 
   output: {
     filename: '[name].js',
     path: path.join(__dirname, 'dist'),
     publicPath: '/dist/',
   },
+
+  devServer: {
+    historyApiFallback: true,
+    port: 3090,
+    publicPath: '/dist/',
+  },
 };
+
+if (isDevelopment && config.plugins) {
+  config.plugins.push(new webpack.HotModuleReplacementPlugin());
+  config.plugins.push(new ReactRefreshWebpackPlugin());
+}
+
+if (!isDevelopment && config.plugins) {
+}
 
 export default config;
