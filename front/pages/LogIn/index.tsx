@@ -7,7 +7,7 @@ import { Link, Redirect } from 'react-router-dom';
 import useSWR from 'swr';
 
 const Login = () => {
-  const { data, error, revalidate } = useSWR('http://localhost:3090/api/users', fetcher);
+  const { data, error, revalidate, mutate } = useSWR('http://localhost:3090/api/users', fetcher);
   const [email, onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput('');
   const [logInError, setLogInError] = useState('');
@@ -18,8 +18,8 @@ const Login = () => {
       setLogInError('');
       axios
         .post('/api/users/login', { email, password }, { withCredentials: true })
-        .then(() => {
-          revalidate();
+        .then((response) => {
+          mutate(response.data, false);
         })
         .catch((error) => {
           setLogInError(error.response?.data);

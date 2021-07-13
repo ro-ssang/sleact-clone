@@ -16,4 +16,4 @@
 - [x] swr 사용하기(쿠키 공유하기)
 - [x] swr 설정 살펴보기
 - [x] 워크스페이스 만들기 + 로그아웃하기
-- [ ] swr 활용법(optimistic ui)
+- [x] swr 활용법(optimistic ui)
