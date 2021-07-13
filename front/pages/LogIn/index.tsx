@@ -3,11 +3,11 @@ import { Button, Error, Form, Header, Input, Label, LinkContainer } from '@pages
 import fetcher from '@utils/fetcher';
 import axios from 'axios';
 import React, { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import useSWR from 'swr';
 
 const Login = () => {
-  const { data, error, revalidate } = useSWR('http://localhost:3090/api/users', fetcher, { dedupingInterval: 100000 });
+  const { data, error, revalidate } = useSWR('http://localhost:3090/api/users', fetcher);
   const [email, onChangeEmail] = useInput('');
   const [password, onChangePassword] = useInput('');
   const [logInError, setLogInError] = useState('');
@@ -18,7 +18,7 @@ const Login = () => {
       setLogInError('');
       axios
         .post('/api/users/login', { email, password }, { withCredentials: true })
-        .then((response) => {
+        .then(() => {
           revalidate();
         })
         .catch((error) => {
@@ -27,6 +27,14 @@ const Login = () => {
     },
     [email, password],
   );
+
+  if (data === undefined) {
+    return <div>로딩중...</div>;
+  }
+
+  if (data) {
+    return <Redirect to="/workspace/channel" />;
+  }
 
   return (
     <div id="container">
